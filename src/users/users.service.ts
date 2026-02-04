@@ -11,23 +11,25 @@ export class UsersService {
 
     constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
-    async create(createUserDto: CreateUserDto){
-
+    async create(createUserDto: CreateUserDto,role:UserRole){
 
         const ExistingUser = await this.userModel.findOne(
             { email: createUserDto.email }
         )
 
+
         if (ExistingUser) {
             throw new Error('User with this email already exists');
         }
+
+
 
         const hashedPassword = await bcrypt.hash(createUserDto.password, 10); // TODO: Hash password before saving
 
         const newUser = new this.userModel({
             ...createUserDto,
             password: hashedPassword    ,
-            rol: UserRole.USER 
+            role: role 
         });
 
         const savedUser = await newUser.save();
@@ -38,6 +40,14 @@ export class UsersService {
         const respondeUserDto: ResponseUserDto = userWithoutPassword;
 
         return respondeUserDto;
+    }
+    
+
+    async findByEmail(email: string): Promise<User | null> {
+        const ExistingUser = await this.userModel.findOne(
+            { email: email }
+        )
+        return ExistingUser;
     }
 
 
