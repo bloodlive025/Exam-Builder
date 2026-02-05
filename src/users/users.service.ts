@@ -50,6 +50,13 @@ export class UsersService {
         return ExistingUser;
     }
 
+    async findByIds(ids: string[]): Promise<User[]> {
+            const users = await this.userModel.find({
+                _id: { $in: ids }
+            });
+        return users;
+    }
+
 
 
 

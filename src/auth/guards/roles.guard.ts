@@ -25,7 +25,7 @@ export class RolesGuard  implements CanActivate {
         
         if (!hasRole) {
             throw new ForbiddenException(
-                'Solo un administrador puede crear profesores',
+                `Ruta permitida solo para: ${requiredRoles.join(', ')}`,
             );
         }
 
