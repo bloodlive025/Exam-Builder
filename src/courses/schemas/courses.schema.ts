@@ -23,7 +23,7 @@ export class Course extends Document {
         type:[{type: Types.ObjectId, ref:'users'}],
         default: []
     })
-    professors: Types.ObjectId[];
+    teachers: Types.ObjectId[];
 
 }
 
