@@ -6,9 +6,12 @@ import { Course, CourseSchema } from './schemas/courses.schema';
 import { UsersModule } from 'src/users/users.module';
 
 @Module({
-  imports: [MongooseModule.forFeature([{name: Course.name, schema: CourseSchema}]),UsersModule], // cOURS.name es solo el nombre de la clase User en string
+  imports: [
+    MongooseModule.forFeature([{ name: Course.name, schema: CourseSchema }]),
+    UsersModule,
+  ], // cOURS.name es solo el nombre de la clase User en string
   providers: [CoursesService],
   controllers: [CoursesController],
-  exports: [CoursesService]
+  exports: [CoursesService],
 })
 export class CoursesModule {}

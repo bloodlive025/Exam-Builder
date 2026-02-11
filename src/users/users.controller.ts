@@ -8,20 +8,17 @@ import { RolesGuard } from 'src/auth/guards/roles.guard';
 
 @Controller('users')
 export class UsersController {
-    constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) {}
 
-    @Post('register/alumno')
-    async registerAlumno(@Body() createUserDto:CreateUserDto) {
-        return this.usersService.create(createUserDto, UserRole.ALUMNO);
-    }
+  @Post('register/alumno')
+  async registerAlumno(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.create(createUserDto, UserRole.ALUMNO);
+  }
 
-    @UseGuards(AuthGuard, RolesGuard)
-    @Roles(UserRole.ADMIN)
-    @Post('register/profesor')
-    async registerProfesor(@Body() createUserDto:CreateUserDto) {
-        return this.usersService.create(createUserDto, UserRole.PROFESOR);
-    }
-
-
-
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Post('register/profesor')
+  async registerProfesor(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.create(createUserDto, UserRole.PROFESOR);
+  }
 }

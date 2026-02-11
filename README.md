@@ -1,6 +1,9 @@
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
+<p align="center">
+  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
+</p>
 
 [circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
 [circleci-url]: https://circleci.com/gh/nestjs/nest
@@ -25,6 +28,64 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+# Exam Builder
+
+Exam Builder es una API RESTful construida con [NestJS](https://nestjs.com/) para la gestión de cursos y usuarios, ideal para sistemas educativos o plataformas de exámenes.
+
+## Características principales
+
+- Gestión de cursos: crear, actualizar, listar y filtrar cursos.
+- Gestión de usuarios con roles (ADMIN, PROFESOR, etc.).
+- Autenticación y autorización con guards y decoradores personalizados.
+- Middleware para logging de peticiones.
+- Estructura modular y escalable.
+
+## Instalación
+
+1. Clona el repositorio:
+  ```bash
+  git clone <url-del-repo>
+  cd exam-builder
+  ```
+2. Instala las dependencias:
+  ```bash
+  npm install
+  ```
+3. Configura las variables de entorno si es necesario.
+4. Inicia el servidor de desarrollo:
+  ```bash
+  npm run start:dev
+  ```
+
+## Uso básico
+
+### Endpoints principales
+
+- `POST /courses` — Crear un curso (requiere rol ADMIN o PROFESOR)
+- `PUT /courses` — Actualizar un curso (requiere rol ADMIN o PROFESOR)
+- `GET /courses` — Listar y filtrar cursos
+
+### Autenticación
+Algunos endpoints requieren autenticación y roles específicos. Consulta el código fuente para más detalles sobre los guards y decoradores.
+
+## Estructura del proyecto
+
+- `src/`
+  - `auth/` — Autenticación y guards
+  - `courses/` — Controlador, servicio y DTOs de cursos
+  - `users/` — Controlador, servicio y DTOs de usuarios
+  - `common/` — Middleware y utilidades
+
+## Pruebas
+
+Ejecuta las pruebas unitarias y de integración con:
+```bash
+npm run test
+```
+
+## Licencia
+
+MIT
 ## Project setup
 
 ```bash
