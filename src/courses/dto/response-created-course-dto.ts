@@ -1,41 +1,47 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
   IsArray,
-  IsMongoId,
   IsNotEmpty,
   IsOptional,
   IsString,
   MinLength,
 } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
-export class UpdateCourseDto {
+
+export class ResponseCreatedCourseDto {
+
+  @ApiProperty({
+    example: '6989ebec342c540e6bbcd92d',
+    description: 'The ID of the course to update',
+    required: true,
+  })
+  @IsNotEmpty()
+  _id: string;
+    
   @ApiProperty({
     example: 'CS101',
     description: 'The code of the course',
-    required: false,
+    required: true,
   })
-  @IsOptional()
-  @IsString()
   @MinLength(6)
-  code: string | undefined;
+  @IsNotEmpty()
+  code: string;
 
   @ApiProperty({
     example: 'Introduction to Computer Science',
     description: 'The name of the course',
-    required: false,
+    required: true,
   })
-  @IsOptional()
   @IsString()
-  name: string | undefined;
+  @IsNotEmpty()
+  name: string;
 
   @ApiProperty({
     example: ['teacherId1', 'teacherId2'],
     description: 'The IDs of the teachers for the course',
     required: false,
-    type: [String],
   })
   @IsOptional()
   @IsArray()
-  @IsMongoId({ each: true })
   teachers?: string[];
 
   @ApiProperty({
@@ -45,6 +51,5 @@ export class UpdateCourseDto {
   })
   @IsOptional()
   @IsArray()
-  @IsMongoId({ each: true })
   students?: string[];
 }

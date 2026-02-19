@@ -9,7 +9,7 @@ import { UsersModule } from 'src/users/users.module';
   imports: [
     MongooseModule.forFeature([{ name: Course.name, schema: CourseSchema }]),
     UsersModule,
-  ], // cOURS.name es solo el nombre de la clase User en string
+  ], // COURS.name es solo el nombre de la clase Course en string
   providers: [CoursesService],
   controllers: [CoursesController],
   exports: [CoursesService],

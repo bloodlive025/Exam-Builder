@@ -6,13 +6,13 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core/services/reflector.service';
 import { ROLES_KEY } from 'src/decorators/roles.decorator';
-import { UserRole } from 'src/users/schemas/users.schema';
+import { EUserRole } from 'src/users/domain/enum/user-role';
 
 interface RequestWithUser extends Request {
   user?: {
     sub: string;
     email: string;
-    role: string;
+    role: EUserRole;
   };
 }
 
@@ -21,7 +21,7 @@ export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(
+    const requiredRoles = this.reflector.getAllAndOverride<EUserRole[]>(
       ROLES_KEY,
       [context.getHandler(), context.getClass()],
     );

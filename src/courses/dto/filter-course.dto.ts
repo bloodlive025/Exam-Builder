@@ -10,7 +10,7 @@ export class FilterCourseDto extends PageableDto {
   })
   @IsOptional()
   @IsMongoId()
-  id?: string;
+  _id?: string;
 
   @ApiProperty({
     example: 'CS101',
@@ -28,5 +28,5 @@ export class FilterCourseDto extends PageableDto {
   })
   @IsOptional()
   @IsString()
-  title?: string;
+  name?: string;
 }

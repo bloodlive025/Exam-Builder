@@ -1,14 +1,14 @@
 import { Schema } from '@nestjs/mongoose';
 import { Prop, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { Document, HydratedDocument, Types } from 'mongoose';
 
 @Schema({ timestamps: true })
-export class Course extends Document {
+export class Course {
   @Prop({ required: true, unique: true, index: true })
   code: string;
 
   @Prop({ required: true })
-  title: string;
+  name: string;
 
   @Prop({
     type: [{ type: Types.ObjectId, ref: 'users' }],
@@ -21,6 +21,10 @@ export class Course extends Document {
     default: [],
   })
   teachers: Types.ObjectId[];
+  createdAt: Date;
+  updatedAt: Date;
 }
+
+export type CourseDocument = HydratedDocument<Course>;
 
 export const CourseSchema = SchemaFactory.createForClass(Course);

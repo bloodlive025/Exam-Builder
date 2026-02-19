@@ -4,23 +4,29 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Course } from './schemas/courses.schema';
+import { Course, CourseDocument } from './schemas/courses.schema';
 import { Model, Types } from 'mongoose';
 import { UsersService } from 'src/users/users.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
-import { UserRole } from 'src/users/schemas/users.schema';
+import { EUserRole } from 'src/users/domain/enum/user-role';
 import { FilterCourseDto } from './dto/filter-course.dto';
-
+import { ICourse } from './interfaces/ICourse';
+import { ICourseFilter } from './interfaces/ICouseFilter';
+import { IPagedResult } from 'src/common/middleware/interfaces/IPagedResult';
+import { IEstudiante } from 'src/users/domain/interfaces/IEstudiante';
+import { IProfesor } from 'src/users/domain/interfaces/IProfesor';
 @Injectable()
 export class CoursesService {
   constructor(
     @InjectModel(Course.name)
-    private courseModel: Model<Course>,
+    private courseModel: Model<CourseDocument>,
     private usersService: UsersService,
   ) {}
 
-  async create(CreateCourseDto: CreateCourseDto) {
+  
+
+  async create(CreateCourseDto: CreateCourseDto): Promise<ICourse> {
     const { students = [], teachers = [], ...CourseData } = CreateCourseDto;
 
     //Validar codigo del curso
@@ -32,59 +38,68 @@ export class CoursesService {
       throw new BadRequestException('Course with this code already exists');
     }
 
-    const studentsUsers = await this.usersService.findByIds(students ?? []);
-    if (studentsUsers.some((u) => u.role !== UserRole.ALUMNO)) {
-      throw new BadRequestException('Uno o más usuarios no son alumnos');
-    }
+    const studentsUsers = await this.validateUsersInCourse(
+      students,
+      EUserRole.ALUMNO,
+    );
 
-    const teachersUsers = await this.usersService.findByIds(teachers ?? []);
-    if (teachersUsers.some((u) => u.role !== UserRole.PROFESOR)) {
-      throw new BadRequestException('Uno o más usuarios no son profesores');
-    }
+    const teachersUsers = await this.validateUsersInCourse(
+      teachers,
+      EUserRole.PROFESOR,
+    );
 
     const newCourse = new this.courseModel({
       ...CourseData,
-      students,
-      teachers,
+      students: studentsUsers,
+      teachers: teachersUsers,
     });
-    return newCourse.save();
+    const savedCourse = await newCourse.save();
+
+    const course: ICourse = this.toDomain(savedCourse);
+    return course;
   }
 
-  async update(updateCourseDto: UpdateCourseDto) {
+  async update(id: string, updateCourseDto: UpdateCourseDto) {
     const { students, teachers, ...courseData } = updateCourseDto;
     const validStudents = await this.validateUsersInCourse(
       students,
-      UserRole.ALUMNO,
+      EUserRole.ALUMNO,
     );
     const validTeachers = await this.validateUsersInCourse(
       teachers,
-      UserRole.PROFESOR,
+      EUserRole.PROFESOR,
     );
-
-    const course = await this.courseModel.findByIdAndUpdate(
-      updateCourseDto.id,
-      {
-        ...courseData,
-        ...(validStudents.length > 0 ? { students: validStudents } : {}),
-        ...(validTeachers.length > 0 ? { teachers: validTeachers } : {}),
-      },
-      { new: true },
-    );
+    
+    const course = await this.courseModel
+      .findByIdAndUpdate(
+        id,
+        {
+          ...courseData,
+          ...(validStudents.length > 0 ? { students: validStudents } : {}),
+          ...(validTeachers.length > 0 ? { teachers: validTeachers } : {}),
+        },
+        { new: true },
+      )
+      .exec();
 
     if (!course) {
       throw new NotFoundException('Curso no encontrado');
     }
 
-    return course;
+    const updatedCourse: ICourse = this.toDomain(course);
+
+    return updatedCourse;
   }
 
   private async validateUsersInCourse(
     ids: string[] | undefined,
-    role: UserRole.ALUMNO | UserRole.PROFESOR,
-  ) {
+    role: EUserRole.ALUMNO | EUserRole.PROFESOR,
+  ): Promise<string[]> {
     if (!ids?.length) return [];
-    const uniqueIds = [...new Set(ids)];
+
+    const uniqueIds = [...new Set(ids)]; // Eliminar IDs duplicados usando conjuntos
     const users = await this.usersService.findByIds(uniqueIds);
+
     if (users.length !== uniqueIds.length) {
       throw new BadRequestException(`Uno o más ${role} no existen`);
     }
@@ -97,26 +112,20 @@ export class CoursesService {
   }
 
   async list(filterCourseDto: FilterCourseDto) {
-    const { code, title, id, page, size } = filterCourseDto;
+    const { code, name, _id, page, size } = filterCourseDto;
 
-    interface CourseFilter {
-      _id?: Types.ObjectId;
-      code?: { $regex: string; $options: string };
-      title?: { $regex: string; $options: string };
-    }
+    const filter: ICourseFilter = {};
 
-    const filter: CourseFilter = {};
-
-    if (id) {
-      filter._id = new Types.ObjectId(id);
+    if (_id) {
+      filter._id = new Types.ObjectId(_id);
     }
 
     if (code) {
       filter.code = { $regex: code, $options: 'i' };
     }
 
-    if (title) {
-      filter.title = { $regex: title, $options: 'i' };
+    if (name) {
+      filter.name = { $regex: name, $options: 'i' };
     }
 
     const skip = page * size;
@@ -126,18 +135,57 @@ export class CoursesService {
       this.courseModel.countDocuments(filter),
     ]);
 
-    return content.length > 0
-      ? {
-          content,
-          totalElements,
-          page,
-          size,
-        }
-      : {
-          content: [],
-          totalElements: 0,
-          page,
-          size,
-        };
+    const contentToDomain = content.map((course) => this.toDomain(course));
+    const PageResponse:IPagedResult<ICourse> = {
+      content: contentToDomain,
+      totalElements,
+      page,
+      size,
+    }
+
+    return PageResponse;
+
+  }
+
+  async getById(id: string): Promise<ICourse<IEstudiante, IProfesor>> {
+    const course = await this.courseModel.findById(id).exec();
+    
+    if (!course) {
+      throw new NotFoundException('Curso no encontrado');
+    }
+
+    const [students, teachers] = await Promise.all([
+      this.usersService.findByIds(course.students),
+      this.usersService.findByIds(course.teachers),
+    ]);
+
+    const studentsDomain = students.map((user) => this.usersService.toDomain(user) as IEstudiante);
+    const teachersDomain = teachers.map((user) => this.usersService.toDomain(user) as IProfesor);
+
+    return this.toDomainExtended(course, studentsDomain , teachersDomain);
+  }
+
+  private toDomain(course: CourseDocument): ICourse {
+    return {
+      _id: course._id.toString(),
+      code: course.code,
+      name: course.name,
+      students: course.students.map((id) => id.toString()),
+      teachers: course.teachers.map((id) => id.toString()),
+      createdAt: course.createdAt,
+      updatedAt: course.updatedAt,
+    };
+  }
+
+  private toDomainExtended(course: CourseDocument, students: IEstudiante[], teachers: IProfesor[]): ICourse<IEstudiante, IProfesor> {
+    return {
+      _id: course._id.toString(),
+      code: course.code,
+      name: course.name,
+      students: students,
+      teachers: teachers,
+      createdAt: course.createdAt,
+      updatedAt: course.updatedAt,
+    };
   }
 }

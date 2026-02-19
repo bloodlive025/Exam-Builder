@@ -25,7 +25,7 @@ export class CreateCourseDto {
   })
   @IsString()
   @IsNotEmpty()
-  title: string;
+  name: string;
 
   @ApiProperty({
     example: ['teacherId1', 'teacherId2'],
