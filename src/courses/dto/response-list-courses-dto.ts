@@ -1,4 +1,4 @@
-import { ICourse } from "../interfaces/ICourse";
+import { ICourse } from "../interfaces/course";
 
 export class ResponseListCourseDto {
   content: ICourse[];

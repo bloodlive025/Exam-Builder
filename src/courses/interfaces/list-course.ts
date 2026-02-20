@@ -1,4 +1,4 @@
-import { ICourse } from "./ICourse";
+import { ICourse } from "./course";
 
 export interface IListCourse {
     courses: ICourse[];

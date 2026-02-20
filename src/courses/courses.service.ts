@@ -11,8 +11,8 @@ import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { EUserRole } from 'src/users/domain/enum/user-role';
 import { FilterCourseDto } from './dto/filter-course.dto';
-import { ICourse } from './interfaces/ICourse';
-import { ICourseFilter } from './interfaces/ICouseFilter';
+import { ICourse } from './interfaces/course';
+import { CourseMongoFilter } from './infraestructure/persistence/course-filter';
 import { IPagedResult } from 'src/common/middleware/interfaces/IPagedResult';
 import { IEstudiante } from 'src/users/domain/interfaces/IEstudiante';
 import { IProfesor } from 'src/users/domain/interfaces/IProfesor';
@@ -114,7 +114,7 @@ export class CoursesService {
   async list(filterCourseDto: FilterCourseDto) {
     const { code, name, _id, page, size } = filterCourseDto;
 
-    const filter: ICourseFilter = {};
+    const filter: CourseMongoFilter = {};
 
     if (_id) {
       filter._id = new Types.ObjectId(_id);

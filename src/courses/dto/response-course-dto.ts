@@ -8,7 +8,7 @@ import {
 } from 'class-validator';
 import { IUser } from 'src/users/domain/interfaces/Iuser';
 import { ResponseUserDto } from 'src/users/dto/response-user.dto';
-import { ICourse } from '../interfaces/ICourse';
+import { ICourse } from '../interfaces/course';
 import { IProfesor } from 'src/users/domain/interfaces/IProfesor';
 import { IEstudiante } from 'src/users/domain/interfaces/IEstudiante';
 
